@@ -314,7 +314,7 @@ document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function
   document.querySelectorAll('.tb').forEach(function(x){x.classList.toggle('on',x.id==='t-'+b.dataset.t)})}});
 function flag(t){var b=document.querySelector('.tabs button[data-t='+t+']');if(!b.classList.contains('on'))b.classList.add('new')}
 
-function wait(ms){return new Promise(function(r){timers.push(setTimeout(r,ms))})}
+var SPD=0.5;function wait(ms){return new Promise(function(r){timers.push(setTimeout(r,ms*SPD))})}
 function scroll(){chat.scrollTop=chat.scrollHeight}
 function msg(cls,who,html){var d=document.createElement('div');d.className='m '+cls;d.innerHTML='<small>'+who+'</small>'+html;chat.appendChild(d);scroll();return d}
 function typing(){var d=document.createElement('div');d.className='typing';d.innerHTML='<i></i><i></i><i></i>';chat.appendChild(d);scroll();return d}
@@ -350,7 +350,7 @@ async function run(){
   var q=msg('a q','⚠ '+t.qT,esc(t.q)+'<div class="opts">'+t.o.map(function(o,i){return'<button data-o="'+i+'">'+esc(o)+'</button>'}).join('')+'</div><div class="hint">'+t.hint+'</div>');
   var answer=new Promise(function(r){qResolve=r});
   q.querySelectorAll('.opts button').forEach(function(b){b.onclick=function(){qResolve(+b.dataset.o)}});
-  var auto=wait(14000).then(function(){return -1});
+  var auto=wait(12000).then(function(){return -1});
   var stepP=(async function(){await countdown(total-Math.round(total*.4),2200);items[2].className='ok';$('secSt').textContent='40%';items[3].className='run';})();
   var a=await Promise.race([answer,auto]);var isAuto=a<0;if(isAuto)a=0;picked=a;
   q.querySelectorAll('.opts button').forEach(function(b,i){b.disabled=true;if(i===a)b.classList.add('pick')});
