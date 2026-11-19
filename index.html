@@ -171,6 +171,9 @@ summary i{font-style:normal;font:11px var(--mono);color:var(--muted);margin-left
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* responsive v2 */
+.feed>*,.chat>*,.list>*,.lst>*{flex-shrink:0}
+@media(max-width:640px){.chat{padding:12px}.m{max-width:100%}.dlv li{font-size:12.5px;flex-wrap:wrap;gap:2px 10px}.it{grid-template-columns:minmax(0,1fr) auto}}
+
 .app{grid-template-columns:minmax(0,1fr)}.app>*,.main>*{min-width:0}
 @media(max-width:860px){.main{grid-template-columns:minmax(0,1fr)!important}}
 @media(max-width:640px){
