@@ -124,9 +124,24 @@ summary i{font-style:normal;font:11px var(--mono);color:var(--muted);margin-left
 
 .file{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--bg);animation:in .35s}
 .file .ic{width:36px;height:42px;border:1px solid var(--line2);border-radius:6px;display:grid;place-items:center;font:600 10px var(--mono);color:var(--g)}
-.file b{display:block;font-size:13.5px;font-weight:500;word-break:break-all}
+.file b{display:block;font-size:13.5px;font-weight:500;overflow-wrap:anywhere}
 .file span{font:11px var(--mono);color:var(--muted)}
 .file .ok{font:11px var(--mono);color:var(--g)}
+.dlv{margin-top:12px;border:1px solid rgba(0,255,65,.3);border-radius:12px;background:var(--bg);overflow:hidden}
+.dlv .hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;color:var(--g)}
+.dlv .hd i{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g)}
+.dlv .pth{padding:10px 14px;font:12.5px var(--mono);color:var(--text);background:rgba(0,255,65,.04);border-bottom:1px solid var(--line);word-break:break-all}
+.dlv .pth span{color:var(--muted)}
+.dlv ul{list-style:none;padding:8px 14px}
+.dlv li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px}
+.dlv li span{font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.dlv li b{font-weight:500;overflow-wrap:anywhere}
+.dlv li b::before{content:"✓ ";color:var(--g)}
+.dlv .act{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap}
+.dlv .act button{padding:8px 14px;border-radius:9px;font-size:13px;border:1px solid var(--line2)}
+.dlv .act button.p{background:var(--g);color:var(--bg);border-color:var(--g);font-weight:600}
+.pathbar{font:12px var(--mono);color:var(--text);padding:10px 12px;border:1px solid rgba(0,255,65,.25);border-radius:10px;margin-bottom:12px;background:rgba(0,255,65,.04);word-break:break-all}
+.pathbar span{color:var(--muted)}
 .arch{display:block;text-align:center;padding:10px;border:1px dashed var(--line2);border-radius:10px;font:12px var(--mono);color:var(--muted);margin-top:4px}
 
 .log{list-style:none;position:relative;padding-left:18px}
@@ -228,7 +243,7 @@ o:["Оставить как есть и отметить в отчёте","За�
 hint:"ответ не останавливает работу - остальные пункты собираются параллельно",
 ack:["Оставляю как есть, расхождение вынесу в отчёт.","Исключаю АОСР-014 из комплекта и добавляю в список запросов.","Помечаю АОСР-014 на переподпись с датой схемы."],
 autopick:"(демо: выбран вариант по умолчанию)",
-done:"Готово. Раздел собран, отчёт и файлы справа.",
+done:"Готово. Раздел собран, отчёт справа.",dlv:"Готовые файлы уже на вашем устройстве",dlvF:"Готовая документация",openF:"Открыть файлы",zip:"Скачать архив",
 sum:"<b>Раздел «Слаботочные системы» собран:</b> 186 листов в одном PDF, реестр сверен с фактическими листами. <mark>2 замечания</mark> к исходникам, подробности ниже.",
 r1:"Сверка реестра",r1i:"186 / 186",r2:"Замечания к исходникам",r2i:"2",r3:"Что собрано",r3i:"7 частей",
 r1t:[["Титул и опись","4","✓"],["Приказы","6","✓"],["АОСР-001…018","54","✓"],["Схемы","24","✓"],["Документы качества","98","✓"]],
@@ -256,7 +271,7 @@ o:["Keep as is and flag it in the report","Request a corrected drawing, leave th
 hint:"answering doesn't stop the work - the other items keep building in parallel",
 ack:["Keeping it as is, the mismatch goes into the report.","Leaving act 014 out and adding it to the request list.","Marking act 014 for re-signing with the drawing's date."],
 autopick:"(demo: default option picked)",
-done:"Done. The section is built; report and files are on the right.",
+done:"Done. The section is built; the report is on the right.",dlv:"Finished files are already on your device",dlvF:"Finished documentation",openF:"Open files",zip:"Download .zip",
 sum:"<b>Section \"Low-voltage systems\" is built:</b> 186 pages in one PDF, register checked against the actual pages. <mark>2 issues</mark> in the source documents, details below.",
 r1:"Register check",r1i:"186 / 186",r2:"Issues in sources",r2i:"2",r3:"What was assembled",r3i:"7 parts",
 r1t:[["Title and inventory","4","✓"],["Orders","6","✓"],["Acts 001…018","54","✓"],["Drawings","24","✓"],["Quality documents","98","✓"]],
@@ -332,8 +347,11 @@ async function run(){
   await step(4,1500);await step(5,1400);await step(6,1200);
   left=0;tick();
   var ty3=typing();await wait(800);ty3.remove();
-  msg('a',t.bot,esc(t.done));
   showReport();showFiles();
+  var F=fileList();
+  var dm=msg('a',t.bot,esc(t.done)+'<div class="dlv"><div class="hd"><i></i>'+esc(t.dlv)+'</div><div class="pth"><span>▸ </span>'+esc(folder())+'/</div><ul>'+F.map(function(f){return'<li><b>'+esc(f[1])+'</b><span>'+f[2]+'</span></li>'}).join('')+'</ul><div class="act"><button class="p" data-a="open">'+esc(t.openF)+'</button><button data-a="zip">⇩ '+esc(t.zip)+'</button></div></div>');
+  dm.querySelector('[data-a=open]').onclick=function(){document.querySelector('.tabs button[data-t=files]').click()};
+  dm.querySelector('[data-a=zip]').onclick=function(){document.querySelector('.tabs button[data-t=files]').click()};
   go.disabled=false;go.textContent=t.again;running=false;
 }
 function addLog(text){var li=document.createElement('li');li.className='nw';li.innerHTML='<time>'+(L==='ru'?'сейчас':'now')+'</time><p>АОСР-014: '.replace('АОСР-014',L==='ru'?'АОСР-014':'Act 014')+esc(text)+'</p>';$('log').prepend(li);flag('log')}
@@ -345,11 +363,12 @@ function showReport(){var t=T[L];
   '<details><summary>'+t.r1+'<i>'+t.r1i+'</i></summary><div class="dt"><table>'+r1+'</table></div></details>'+
   '<details><summary>'+t.r3+'<i>'+t.r3i+'</i></summary><div class="dt">'+esc(t.r3t)+'</div></details>';
   document.querySelector('.tabs button[data-t=rep]').click();}
+function today(){var d=new Date();return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear()}
+function folder(){return T[L].dlvF+' '+today()}
+function fileList(){var ru=L==='ru';return [["PDF",ru?"ИД_Слаботочные_системы_v3.pdf":"AsBuilt_LowVoltage_v3.pdf",ru?"18.4 МБ · 186 стр.":"18.4 MB · 186 pages","a91f…4c2e"],["XLS",ru?"Реестр_ИД_СС.xlsx":"Register_LV.xlsx",ru?"48 КБ":"48 KB","07bd…e913"],["PDF",ru?"Замечания_к_исходникам.pdf":"Source_issues.pdf",ru?"212 КБ":"212 KB","5c10…88af"]]}
 function showFiles(){var t=T[L],ru=L==='ru';
-  var F=[["PDF",ru?"ИД_Слаботочные_системы_v3.pdf":"AsBuilt_LowVoltage_v3.pdf","18.4 MB · 186 стр.".replace('стр.',ru?'стр.':'pages'),"a91f…4c2e"],
-         ["XLS",ru?"Реестр_ИД_СС.xlsx":"Register_LV.xlsx","48 KB","07bd…e913"],
-         ["PDF",ru?"Замечания_к_исходникам.pdf":"Source_issues.pdf","212 KB","5c10…88af"]];
-  $('t-files').innerHTML=F.map(function(f){return'<div class="file"><div class="ic">'+f[0]+'</div><div><b>'+f[1]+'</b><span>'+f[2]+' · sha256 '+f[3]+'</span></div><span class="ok">✓ '+t.sha+'</span></div>'}).join('')+
+  var F=fileList();
+  $('t-files').innerHTML='<div class="pathbar"><span>▸ </span>'+esc(folder())+'/</div>'+F.map(function(f){return'<div class="file"><div class="ic">'+f[0]+'</div><div><b>'+f[1]+'</b><span>'+f[2]+' · sha256 '+f[3]+'</span></div><span class="ok">✓ '+t.sha+'</span></div>'}).join('')+
   '<div style="font:11px var(--mono);color:var(--muted);margin:4px 0 10px">↻ '+t.fsync+'</div><span class="arch">⇩ '+t.archive+'</span>';flag('files')}
 function stamp(fixed){
   var f=fixed;return '<svg viewBox="0 0 360 120" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono,monospace">'+
